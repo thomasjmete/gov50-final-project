@@ -5,8 +5,6 @@ description: "This is my Gov 50 Final Project for Fall 2023. The topic and resea
 ---
 
 ```{r setup, include=FALSE}
-# Include any necessary libraries or packages here
-library(ggplot2)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
