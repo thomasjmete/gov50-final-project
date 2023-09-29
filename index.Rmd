@@ -2,12 +2,7 @@
 title: "Gov 50 Final Project"
 author: "Thomas J. Mete"
 description: "This is my Gov 50 Final Project for Fall 2023. The topic and reserach question have not yet been finalized but see "Project Thoughts" for some preliminary ideas."
-output:
-  distill::distill_article:
-    self_contained: false
 ---
-
-
 
 ## Project Thoughts
 
