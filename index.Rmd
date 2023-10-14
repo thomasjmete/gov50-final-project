@@ -8,5 +8,38 @@ description: "This is my Gov 50 Final Project for Fall 2023. The topic and resea
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Project Thoughts
+## Project Thoughts (Part 1)
 Over the course of this final project I am intrested in exploring the transition of hockey players from junior leagues to the NHL. I could look at their PPG in both leauges, see how long it takes depending on the junior leauge how long it takes for them to clear a certain salary or points mark, or see if their draft position or country of birth is a better indicator for NHL success than the junior leauge they played in. Potential sources of data are Corsica Hockey, HockeyDB, EliteProspects, or official leauge websites such as the NHL, OHL, WHL, QMJHL, NCAA, SHL.
+
+## Project Proposal (Part 2)
+The two data sets used are formed with data from hockeyreference.com and made into a .csv by FiveThirtyEight as a part of their sports forecasting Elo Rating System — this data is for the NHL. FiveThirtyEight used two data sets to calculate a Elo Rating System that attempts to predict if a team will win a game and applies the results to predict who will be Stanley Cup Champions in the current NHL season. 
+
+My research question is do more goals occur in games of less importance? In this study, I plan to examine the extent to which this applies and if this only holds true for certain teams.
+
+I hypothesize that more goals occur in games of less importance which are games where importance is based on the game’s effect on possibly making playoffs. During games of more importance I expect there to be fewer goals due to heightened competitiveness and each goal being more consequential. I expect that there will be more goals and games of less importance because teams may opt to rest their better goalies and since there are lower stakes team’s may be more lenient on defense.
+
+My explanatory variable will be how many goals are scored in a game. My outcome variable will be game_importance_rating. This variable is measured based on how much the result would affect the team’s playoff odds, on a scale from 0 to 100. If I observe a higher game importance rating when there are a high number of goals my hypothesis would be disproven. If I observe a higher game importance rating when there are a low number of goals my hypothesis would be supported. A negative correlation efficient would support my hypothesis as when game importance rises the number of goals scored decreases. I might also examine historical data to see if this pattern has held true over multiple seasons or time periods, given there is data from 1917 as well.
+
+
+## Read in the Data Set 
+```{r, eval = T}
+library(dbplyr)
+library(tidyverse)
+
+latest <- read.csv("nhl_elo_latest.csv")
+historical <- read.csv("nhl_elo.csv")
+
+## Merge Datasets
+total <- rbind(latest, historical)
+
+## See the Datasets
+head(latest)
+head(historical)
+
+## Check if merge worked
+total |>
+  filter(season == 1918)
+
+total |>
+  filter(season == 2023)
+```
