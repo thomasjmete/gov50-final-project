@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 Over the course of this final project I am intrested in exploring the transition of hockey players from junior leagues to the NHL. I could look at their PPG in both leauges, see how long it takes depending on the junior leauge how long it takes for them to clear a certain salary or points mark, or see if their draft position or country of birth is a better indicator for NHL success than the junior leauge they played in. Potential sources of data are Corsica Hockey, HockeyDB, EliteProspects, or official leauge websites such as the NHL, OHL, WHL, QMJHL, NCAA, SHL.
 
 ## Project Proposal (Part 2)
-The two data sets used are formed with data from hockeyreference.com and made into a .csv by FiveThirtyEight as a part of their sports forecasting Elo Rating System — this data is for the NHL. FiveThirtyEight used two data sets to calculate a Elo Rating System that attempts to predict if a team will win a game and applies the results to predict who will be Stanley Cup Champions in the current NHL season. 
+The two data sets used are formed with data from hockeyreference.com and made into a .csv by FiveThirtyEight as a part of their sports forecasting Elo Rating System — this data is for the NHL. FiveThirtyEight used two data sets to calculate a Elo Rating System that attempts to predict if a team will win a game and applies the results to predict who will be the Stanley Cup Champion in the current NHL season. 
 
 My research question is do more goals occur in games of less importance? In this study, I plan to examine the extent to which this applies and if this only holds true for certain teams.
 
