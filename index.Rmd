@@ -35,11 +35,42 @@ total <- rbind(latest, historical)
 ## See the Datasets
 head(latest)
 head(historical)
+```
 
 ## Check if merge worked
+
+```{r, eval = F}
 total |>
   filter(season == 1918)
 
 total |>
   filter(season == 2023)
 ```
+
+## Histogram
+```{r}
+
+ms3_data <- total |>
+  filter(season %in% c("2021", "2022", "2023"), home_team %in% c("Edmonton Oilers", "Montreal Canadiens", "Calgary Flames", "Toronto Maple Leafs", "Winnipeg Jets", "Vancouver Canucks","Ottawa Senators"))
+
+ms3 <- ggplot(data = ms3_data, mapping = aes(
+  x = home_team_score, 
+  y = home_team_postgame_rating,
+  color = home_team,
+  fill = home_team)) +
+    geom_point() + geom_smooth() +
+    labs( 
+    title = "NHL Home Team Analysis (Regular Season)",
+    x = "Number of Goals Scored by Home Team",
+    y = "Performance Score of Home Team",
+    subtitle = "A Relationship Between Goals and Performance",
+    source = "FiveThirtyEight, 2023"
+    ) +
+  theme(text = element_text(size = 9))
+ 
+ms3
+
+
+```
+
+
