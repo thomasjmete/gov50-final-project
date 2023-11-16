@@ -71,4 +71,209 @@ ms3
 
 ```
 
+## Part 4
+
+Lets compare the effect of home ice advantage on the number of goals scored
+
+```{r}
+#Filter to Only Boston Bruins, Make Variable for if BOS Home or Away and Variable for BOS Goals
+bos_data <- total |>
+  filter(home_team_abbr == "BOS" | away_team_abbr == "BOS") |>
+  mutate(bos_location = if_else(home_team_abbr == "BOS", "Home", "Away"),
+         bos_score = if_else(bos_location == "Away", away_team_score, home_team_score))
+
+#Find ATE of Playing at Home on Goals Scored
+bos_ate <- bos_data |>
+  group_by(bos_location) |>
+  summarise(bos_score_mean = mean(bos_score)) |>
+  pivot_wider(names_from = bos_location, values_from = bos_score_mean) |>
+  mutate(ATE = `Home` - `Away`)
+bos_ate
+
+#Let's Try Bootstrapping
+library(infer)
+
+bos_boots <- bos_data |>
+  rep_slice_sample(prop = 1, replace = TRUE, reps = 1000) |>
+  group_by(replicate, bos_location) |>
+  summarise(bos_score_mean = mean(bos_score)) |>
+  pivot_wider(names_from = bos_location, values_from = bos_score_mean) |>
+  mutate(ATE = `Home` - `Away`) |>
+  select(replicate, ATE)
+
+bos_ci_95 <- bos_boots |>
+  get_confidence_interval(level = 0.95, type = "percentile")
+bos_ci_95
+
+bos_boots_plot <- bos_boots |>
+  ggplot(mapping = aes(x = ATE)) + 
+  geom_histogram(aes(y = after_stat(density)), binwidth = 0.0035, fill = "#F5C710") +
+  geom_vline(xintercept = unlist(bos_ci_95)) +
+  labs(y = "Density", x = "Additional Goals Scored When Play at Home") + 
+  ggtitle("Boston's Home Ice Advantage: The Effect on Goals over 1000 Bootstraps")
+bos_boots_plot
+
+```
+
+How does this change over fanbases that are considered less engaged vs fan bases that are hardcore?
+
+```{r}
+#What about in the best fan base (Montréal Canadiens)
+#Filter to Only Montréal, Make Variable for if MTL Home or Away and Variable for MTL Goals
+mtl_data <- total |>
+  filter(home_team_abbr == "MTL" | away_team_abbr == "MTL") |>
+  mutate(mtl_location = if_else(home_team_abbr == "MTL", "Home", "Away"),
+         mtl_score = if_else(mtl_location == "Away", away_team_score, home_team_score))
+
+#Find ATE of Playing at Home on Goals Scored
+mtl_ate <- mtl_data |>
+  group_by(mtl_location) |>
+  summarise(mtl_score_mean = mean(mtl_score)) |>
+  pivot_wider(names_from = mtl_location, values_from = mtl_score_mean) |>
+  mutate(ATE = `Home` - `Away`)
+mtl_ate
+
+#Let's Try Bootstrapping
+library(infer)
+
+mtl_boots <- mtl_data |>
+  rep_slice_sample(prop = 1, replace = TRUE, reps = 1000) |>
+  group_by(replicate, mtl_location) |>
+  summarise(mtl_score_mean = mean(mtl_score)) |>
+  pivot_wider(names_from = mtl_location, values_from = mtl_score_mean) |>
+  mutate(ATE = `Home` - `Away`) |>
+  select(replicate, ATE)
+
+mtl_ci_95 <- mtl_boots |>
+  get_confidence_interval(level = 0.95, type = "percentile")
+mtl_ci_95
+
+mtl_boots_plot <- mtl_boots |>
+  ggplot(mapping = aes(x = ATE)) + 
+  geom_histogram(aes(y = after_stat(density)), binwidth = 0.0035, fill = "#DF5365") +
+  geom_vline(xintercept = unlist(mtl_ci_95)) +
+  labs(y = "Density", x = "Additional Goals Scored When Play at Home") + 
+  ggtitle("Montréal's Home Ice Advantage: The Effect on Goals over 1000 Bootstraps")
+mtl_boots_plot
+```
+
+
+```{r}
+#What about in the worst fan base (Florida Panthers)
+#Filter to Only Florida, Make Variable for if FLA Home or Away and Variable for FLA Goals
+fla_data <- total |>
+  filter(home_team_abbr == "FLA" | away_team_abbr == "FLA") |>
+  mutate(fla_location = if_else(home_team_abbr == "FLA", "Home", "Away"),
+         fla_score = if_else(fla_location == "Away", away_team_score, home_team_score))
+
+#Find ATE of Playing at Home on Goals Scored
+fla_ate <- fla_data |>
+  group_by(fla_location) |>
+  summarise(fla_score_mean = mean(fla_score)) |>
+  pivot_wider(names_from = fla_location, values_from = fla_score_mean) |>
+  mutate(ATE = `Home` - `Away`)
+fla_ate
+
+#Let's Try Bootstrapping
+library(infer)
+
+fla_boots <- fla_data |>
+  rep_slice_sample(prop = 1, replace = TRUE, reps = 1000) |>
+  group_by(replicate, fla_location) |>
+  summarise(fla_score_mean = mean(fla_score)) |>
+  pivot_wider(names_from = fla_location, values_from = fla_score_mean) |>
+  mutate(ATE = `Home` - `Away`) |>
+  select(replicate, ATE)
+
+fla_ci_95 <- fla_boots |>
+  get_confidence_interval(level = 0.95, type = "percentile")
+fla_ci_95
+
+fla_boots_plot <- fla_boots |>
+  ggplot(mapping = aes(x = ATE)) + 
+  geom_histogram(aes(y = after_stat(density)), binwidth = 0.0035, fill = "#F0E68C") +
+  geom_vline(xintercept = unlist(fla_ci_95)) +
+  labs(y = "Density", x = "Additional Goals Scored When Play at Home") + 
+  ggtitle("Florida's Home Ice Advantage: The Effect on Goals over 1000 Bootstraps")
+fla_boots_plot
+```
+
+What happens when a team moves from an older "iconic" venue to a more modern NHL Arena (newer and more seats. I will explore the Philadelphia Flyers that played in The Spectrum from 1967 to 1996 and the moved to the Wells Fargo Center in 1997.
+
+```{r}
+#Filter to Only Philadelphia, Make Variable for if PHI Home or Away and Variable for PHI Goals
+phi_data <- total |>
+  filter(home_team_abbr == "PHI" | away_team_abbr == "PHI") |>
+  mutate(phi_location = if_else(home_team_abbr == "PHI", "Home", "Away"),
+         phi_score = if_else(phi_location == "Away", away_team_score, home_team_score))
+
+#Make a Spectrum data set and a Wells Fargo data set
+spect_data <- phi_data |>
+  filter(season >= 1967 & season <= 1996)
+
+wf_data <- phi_data |>
+  filter(season >= 1996 & season <= 2023)
+
+#Find ATE of Playing at Home in The Spectrum on Goals Scored
+spect_ate <- spect_data |>
+  group_by(phi_location) |>
+  summarise(phi_score_mean = mean(phi_score)) |>
+  pivot_wider(names_from = phi_location, values_from = phi_score_mean) |>
+  mutate(ATE = `Home` - `Away`)
+spect_ate
+
+#Let's Try Bootstrapping
+library(infer)
+
+spect_boots <- spect_data |>
+  rep_slice_sample(prop = 1, replace = TRUE, reps = 1000) |>
+  group_by(replicate, phi_location) |>
+  summarise(phi_score_mean = mean(phi_score)) |>
+  pivot_wider(names_from = phi_location, values_from = phi_score_mean) |>
+  mutate(ATE = `Home` - `Away`) |>
+  select(replicate, ATE)
+
+spect_ci_95 <- spect_boots |>
+  get_confidence_interval(level = 0.95, type = "percentile")
+spect_ci_95
+
+spect_boots_plot <- spect_boots |>
+  ggplot(mapping = aes(x = ATE)) + 
+  geom_histogram(aes(y = after_stat(density)), binwidth = 0.0035, fill = "#FF6F00") +
+  geom_vline(xintercept = unlist(spect_ci_95)) +
+  labs(y = "Density", x = "Additional Goals Scored When Play at The Spectrum") + 
+  ggtitle("Phiadelphia's Home Ice Advantage at The Spectrum: The Effect on Goals over 1000 Bootstraps")
+spect_boots_plot
+
+#Find ATE of Playing at Home in The Wells Fargo Center on Goals Scored
+wf_ate <- wf_data |>
+  group_by(phi_location) |>
+  summarise(phi_score_mean = mean(phi_score)) |>
+  pivot_wider(names_from = phi_location, values_from = phi_score_mean) |>
+  mutate(ATE = `Home` - `Away`)
+wf_ate
+
+#Let's Try Bootstrapping
+library(infer)
+
+wf_boots <- wf_data |>
+  rep_slice_sample(prop = 1, replace = TRUE, reps = 1000) |>
+  group_by(replicate, phi_location) |>
+  summarise(phi_score_mean = mean(phi_score)) |>
+  pivot_wider(names_from = phi_location, values_from = phi_score_mean) |>
+  mutate(ATE = `Home` - `Away`) |>
+  select(replicate, ATE)
+
+wf_ci_95 <- wf_boots |>
+  get_confidence_interval(level = 0.95, type = "percentile")
+wf_ci_95
+
+wf_boots_plot <- wf_boots |>
+  ggplot(mapping = aes(x = ATE)) + 
+  geom_histogram(aes(y = after_stat(density)), binwidth = 0.0035, fill = "#FF6F00") +
+  geom_vline(xintercept = unlist(wf_ci_95)) +
+  labs(y = "Density", x = "Additional Goals Scored When Play at The Spectrum") + 
+  ggtitle("Phiadelphia's Home Ice Advantage at The Wells Fargo Center: The Effect on Goals over 1000 Bootstraps")
+wf_boots_plot
+```
 
