@@ -277,3 +277,4 @@ wf_boots_plot <- wf_boots |>
 wf_boots_plot
 ```
 
+Examing the effects of home ice advantage on the amount of goals a hom team scores I observed a statisticly signifigant average treatment effect. It was seen that different teams have a higher treatment effect based on the games attendance. I also observed that when a team moved from an old to new arena that has less character there is a lower average treatment effect from home ice advantage. Overall home ice advantage does exist in terms of the effect on the amount of goals the home team scores and this effect is greater among teams with more dedicated fanbases and lower when teams move into newer NHL arenas.
