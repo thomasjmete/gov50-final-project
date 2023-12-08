@@ -1,31 +1,19 @@
 ---
-title: "Gov 50 Final Project"
+title: "Gov 50 Final Project: The Effects of Home Ice Advantage in the NHL"
 author: "Thomas J. Mete"
-description: "This is my Gov 50 Final Project for Fall 2023. The topic and research question have not yet been finalized. Preliminary ideas can be found below each part corresponds to the respective Gov 50 final assignment checkpoints."
+description:
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Part 1 -> Project Thoughts
-Over the course of this final project I am intrested in exploring the transition of hockey players from junior leagues to the NHL. I could look at their PPG in both leauges, see how long it takes depending on the junior leauge how long it takes for them to clear a certain salary or points mark, or see if their draft position or country of birth is a better indicator for NHL success than the junior leauge they played in. Potential sources of data are Corsica Hockey, HockeyDB, EliteProspects, or official leauge websites such as the NHL, OHL, WHL, QMJHL, NCAA, SHL.
-
-## Part 2 -> Project Proposal
-The two data sets used are formed with data from hockeyreference.com and made into a .csv by FiveThirtyEight as a part of their sports forecasting Elo Rating System — this data is for the NHL. FiveThirtyEight used two data sets to calculate a Elo Rating System that attempts to predict if a team will win a game and applies the results to predict who will be the Stanley Cup Champion in the current NHL season. 
-
-My research question is do more goals occur in games of less importance? In this study, I plan to examine the extent to which this applies and if this only holds true for certain teams.
-
-I hypothesize that more goals occur in games of less importance which are games where importance is based on the game’s effect on possibly making playoffs. During games of more importance I expect there to be fewer goals due to heightened competitiveness and each goal being more consequential. I expect that there will be more goals and games of less importance because teams may opt to rest their better goalies and since there are lower stakes team’s may be more lenient on defense.
-
-My explanatory variable will be how many goals are scored in a game. My outcome variable will be game_importance_rating. This variable is measured based on how much the result would affect the team’s playoff odds, on a scale from 0 to 100. If I observe a higher game importance rating when there are a high number of goals my hypothesis would be disproven. If I observe a higher game importance rating when there are a low number of goals my hypothesis would be supported. A negative correlation efficient would support my hypothesis as when game importance rises the number of goals scored decreases. I might also examine historical data to see if this pattern has held true over multiple seasons or time periods, given there is data from 1917 as well.
-
-
-## Part 2 -> Read in the Data Set 
+## Read in the Data Set 
 ```{r, eval = T}
 library(dbplyr)
 library(tidyverse)
 
+# Read in the two data sets
 latest <- read.csv("nhl_elo_latest.csv")
 historical <- read.csv("nhl_elo.csv")
 
@@ -37,7 +25,7 @@ head(latest)
 head(historical)
 ```
 
-## Part 2 -> Check if merge worked
+## Check if the dataset merge worked
 ```{r, eval = F}
 total |>
   filter(season == 1918)
@@ -46,36 +34,10 @@ total |>
   filter(season == 2023)
 ```
 
-## Part 3 -> Visualise the Data 
-```{r}
-
-ms3_data <- total |>
-  filter(season %in% c("2021", "2022", "2023"), home_team %in% c("Edmonton Oilers", "Montreal Canadiens", "Calgary Flames", "Toronto Maple Leafs", "Winnipeg Jets", "Vancouver Canucks","Ottawa Senators"), playoff == "0")
-
-ms3 <- ggplot(data = ms3_data, mapping = aes(
-  x = home_team_score, 
-  y = home_team_postgame_rating,
-  color = home_team,
-  fill = home_team)) +
-    geom_point() + geom_smooth() +
-    labs( 
-    title = "NHL Home Team Analysis in the Regular Season",
-    x = "Number of Goals Scored by Home Team",
-    y = "Performance Rating of Home Team",
-    subtitle = "The Relationship Between Goals and Performance Rating of Canadian NHL Teams",
-    source = "FiveThirtyEight, 2023"
-    ) + theme_classic() 
-
-ms3
-
-
-```
-
-## Part 4
-
-Lets compare the effect of home ice advantage on the number of goals scored
+## What is the Average Treatment Effect of the Boston Bruins playaing at home (we will observe number of goals scored as the dependent variable).
 
 ```{r}
+
 #Filter to Only Boston Bruins, Make Variable for if BOS Home or Away and Variable for BOS Goals
 bos_data <- total |>
   filter(home_team_abbr == "BOS" | away_team_abbr == "BOS") |>
@@ -89,6 +51,11 @@ bos_ate <- bos_data |>
   pivot_wider(names_from = bos_location, values_from = bos_score_mean) |>
   mutate(ATE = `Home` - `Away`)
 bos_ate
+
+knitr::kable(
+  bos_ate,
+  col.names = c("Home", "Away", "ATE of Home Ice"), caption = "Boston Bruins: Number Goals Scored",
+  digits = 2)
 
 #Let's Try Bootstrapping
 library(infer)
@@ -105,9 +72,14 @@ bos_ci_95 <- bos_boots |>
   get_confidence_interval(level = 0.95, type = "percentile")
 bos_ci_95
 
+knitr::kable(
+  bos_ci_95,
+  col.names = c("Lower Confidence Interval", "Upper Confidence Interval"), caption = "Boston Bruins: Confidence Interval at 95%",
+  digits = 2)
+
 bos_boots_plot <- bos_boots |>
   ggplot(mapping = aes(x = ATE)) + 
-  geom_histogram(aes(y = after_stat(density)), binwidth = 0.0035, fill = "#F5C710") +
+  geom_histogram(aes(y = after_stat(density)), binwidth = 0.0055, fill = "#F5C710") +
   geom_vline(xintercept = unlist(bos_ci_95)) +
   labs(y = "Density", x = "Additional Goals Scored When Play at Home") + 
   ggtitle("Boston's Home Ice Advantage: The Effect on Goals over 1000 Bootstraps")
@@ -115,7 +87,7 @@ bos_boots_plot
 
 ```
 
-How does this change over fanbases that are considered less engaged vs fan bases that are hardcore?
+## How does this change over fanbases that are considered less engaged vs fan bases that are hardcore? We wil use the Montrèal Canadiens as a hardcore fanbase and the Florida Panthers as a less engaged fan base, these choices were made off attendance.
 
 ```{r}
 #What about in the best fan base (Montréal Canadiens)
@@ -133,6 +105,11 @@ mtl_ate <- mtl_data |>
   mutate(ATE = `Home` - `Away`)
 mtl_ate
 
+knitr::kable(
+  mtl_ate,
+  col.names = c("Home", "Away", "ATE of Home Ice"), caption = "Montrèal Canadiens: Number Goals Scored",
+  digits = 2)
+
 #Let's Try Bootstrapping
 library(infer)
 
@@ -148,9 +125,14 @@ mtl_ci_95 <- mtl_boots |>
   get_confidence_interval(level = 0.95, type = "percentile")
 mtl_ci_95
 
+knitr::kable(
+  mtl_ci_95,
+  col.names = c("Lower Confidence Interval", "Upper Confidence Interval"), caption = "Montrèal Canadiens: Confidence Interval at 95%",
+  digits = 2)
+
 mtl_boots_plot <- mtl_boots |>
   ggplot(mapping = aes(x = ATE)) + 
-  geom_histogram(aes(y = after_stat(density)), binwidth = 0.0035, fill = "#DF5365") +
+  geom_histogram(aes(y = after_stat(density)), binwidth = 0.0055, fill = "#DF5365") +
   geom_vline(xintercept = unlist(mtl_ci_95)) +
   labs(y = "Density", x = "Additional Goals Scored When Play at Home") + 
   ggtitle("Montréal's Home Ice Advantage: The Effect on Goals over 1000 Bootstraps")
@@ -174,6 +156,11 @@ fla_ate <- fla_data |>
   mutate(ATE = `Home` - `Away`)
 fla_ate
 
+knitr::kable(
+  fla_ate,
+  col.names = c("Home", "Away", "ATE of Home Ice"), caption = "Florida Panthers: Number Goals Scored",
+  digits = 2)
+
 #Let's Try Bootstrapping
 library(infer)
 
@@ -189,16 +176,21 @@ fla_ci_95 <- fla_boots |>
   get_confidence_interval(level = 0.95, type = "percentile")
 fla_ci_95
 
+knitr::kable(
+  fla_ci_95,
+  col.names = c("Lower Confidence Interval", "Upper Confidence Interval"), caption = "Florida Panthers: Confidence Interval at 95%",
+  digits = 2)
+
 fla_boots_plot <- fla_boots |>
   ggplot(mapping = aes(x = ATE)) + 
-  geom_histogram(aes(y = after_stat(density)), binwidth = 0.0035, fill = "#F0E68C") +
+  geom_histogram(aes(y = after_stat(density)), binwidth = 0.0055, fill = "#F0E68C") +
   geom_vline(xintercept = unlist(fla_ci_95)) +
   labs(y = "Density", x = "Additional Goals Scored When Play at Home") + 
   ggtitle("Florida's Home Ice Advantage: The Effect on Goals over 1000 Bootstraps")
 fla_boots_plot
 ```
 
-What happens when a team moves from an older "iconic" venue to a more modern NHL Arena (newer and more seats. I will explore the Philadelphia Flyers that played in The Spectrum from 1967 to 1996 and the moved to the Wells Fargo Center in 1997.
+## What happens when a team moves from an older "iconic" venue to a more modern NHL Arena (newer and more seats). We will explore the Philadelphia Flyers, they played in The Spectrum from 1967 to 1996 and the moved to the Wells Fargo Center in 1997.
 
 ```{r}
 #Filter to Only Philadelphia, Make Variable for if PHI Home or Away and Variable for PHI Goals
@@ -222,6 +214,11 @@ spect_ate <- spect_data |>
   mutate(ATE = `Home` - `Away`)
 spect_ate
 
+knitr::kable(
+  spect_ate,
+  col.names = c("Home", "Away", "ATE of Home Ice"), caption = "The Specterum: Number Goals Scored",
+  digits = 2)
+
 #Let's Try Bootstrapping
 library(infer)
 
@@ -237,9 +234,14 @@ spect_ci_95 <- spect_boots |>
   get_confidence_interval(level = 0.95, type = "percentile")
 spect_ci_95
 
+knitr::kable(
+  spect_ci_95,
+  col.names = c("Lower Confidence Interval", "Upper Confidence Interval"), caption = "The Spectrum: Confidence Interval at 95%",
+  digits = 2)
+
 spect_boots_plot <- spect_boots |>
   ggplot(mapping = aes(x = ATE)) + 
-  geom_histogram(aes(y = after_stat(density)), binwidth = 0.0035, fill = "#FF6F00") +
+  geom_histogram(aes(y = after_stat(density)), binwidth = 0.0055, fill = "#FF6F00") +
   geom_vline(xintercept = unlist(spect_ci_95)) +
   labs(y = "Density", x = "Additional Goals Scored When Play at The Spectrum") + 
   ggtitle("Phiadelphia's Home Ice Advantage at The Spectrum: The Effect on Goals over 1000 Bootstraps")
@@ -252,6 +254,11 @@ wf_ate <- wf_data |>
   pivot_wider(names_from = phi_location, values_from = phi_score_mean) |>
   mutate(ATE = `Home` - `Away`)
 wf_ate
+
+knitr::kable(
+  wf_ate,
+  col.names = c("Home", "Away", "ATE of Home Ice"), caption = "Wells Fargo: Number Goals Scored",
+  digits = 2)
 
 #Let's Try Bootstrapping
 library(infer)
@@ -270,11 +277,36 @@ wf_ci_95
 
 wf_boots_plot <- wf_boots |>
   ggplot(mapping = aes(x = ATE)) + 
-  geom_histogram(aes(y = after_stat(density)), binwidth = 0.0035, fill = "#FF6F00") +
+  geom_histogram(aes(y = after_stat(density)), binwidth = 0.0055, fill = "#FF6F00") +
   geom_vline(xintercept = unlist(wf_ci_95)) +
   labs(y = "Density", x = "Additional Goals Scored When Play at The Spectrum") + 
   ggtitle("Phiadelphia's Home Ice Advantage at The Wells Fargo Center: The Effect on Goals over 1000 Bootstraps")
 wf_boots_plot
+
 ```
 
-Examing the effects of home ice advantage on the amount of goals a hom team scores I observed a statisticly signifigant average treatment effect. It was seen that different teams have a higher treatment effect based on the games attendance. I also observed that when a team moved from an old to new arena that has less character there is a lower average treatment effect from home ice advantage. Overall home ice advantage does exist in terms of the effect on the amount of goals the home team scores and this effect is greater among teams with more dedicated fanbases and lower when teams move into newer NHL arenas.
+## Looking at the Boston Bruins we will run a regression of the number of goals scored (`bos_score`) as the dependent variable, `bos_location` as the main independent variable, and the following other control/independent variables playoff game (`playoff`) and game went to overtime (`ot`). 
+
+```{r}
+
+fit_bos <- lm(bos_score ~ bos_location + playoff + ot, data = bos_data)
+
+summary(fit_bos)
+
+modelsummary::modelsummary(fit_bos,
+                           statistic = c("s.e. = {std.error}",
+                                         "p = {p.value}"),
+                           gof_map = c("nobs", "r.squared", "adj.r.squared"))
+```
+
+
+
+
+
+
+
+
+
+
+
+
