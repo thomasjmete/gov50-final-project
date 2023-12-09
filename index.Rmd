@@ -21,8 +21,8 @@ historical <- read.csv("nhl_elo.csv")
 total <- rbind(latest, historical)
 
 ## See the Datasets
-head(latest)
-head(historical)
+knitr::kable(head(latest))
+knitr::kable(head(historical))
 ```
 
 ## Check if the dataset merge worked
@@ -298,6 +298,13 @@ modelsummary::modelsummary(fit_bos,
                                          "p = {p.value}"),
                            gof_map = c("nobs", "r.squared", "adj.r.squared"))
 ```
+
+
+
+
+
+
+
 
 
 
