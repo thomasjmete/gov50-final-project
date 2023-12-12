@@ -33,6 +33,18 @@ total |>
 total |>
   filter(season == 2023)
 ```
+## Fix Overtime Variable to sperate multiple overtimes and a shootout
+```{r}
+
+## Make Overtime variable numeric
+
+total <- total |>
+  mutate(
+    overtime = if_else(ot == "OT", 1, 0),
+    shootout = if_else(ot == "SO", 1, 0)
+  )
+```
+
 
 ## What is the Average Treatment Effect of the Boston Bruins playaing at home (we will observe number of goals scored as the dependent variable).
 
@@ -56,6 +68,21 @@ knitr::kable(
   bos_ate,
   col.names = c("Home", "Away", "ATE of Home Ice"), caption = "Boston Bruins: Number Goals Scored",
   digits = 2)
+
+## Visualization Comparing Number of Goals Boston Scores at Home versus Away
+plot_vis <- bos_data |>
+  group_by(bos_location) |>
+  summarise(bos_score_mean = mean(bos_score)) |>
+  ggplot(aes(x = bos_location, y = bos_score_mean, fill = factor(bos_location))) +
+  geom_col(width = 0.7) +
+  labs(title = "Boston Bruins: Goals Scored Home vs Away",
+       x = "Location",
+       y = "Number of Goals Scored") +   
+  scale_fill_manual(values = c("Home" = "#F5C710", "Away" = "black")) +
+  geom_text(aes(label = round(bos_score_mean, 2)),
+            position = position_dodge(width = 0.7),
+            vjust = -0.5, color = "black", size = 3)
+plot_vis
 
 #Let's Try Bootstrapping
 library(infer)
@@ -86,6 +113,10 @@ bos_boots_plot <- bos_boots |>
 bos_boots_plot
 
 ```
+```
+
+
+
 
 ## How does this change over fanbases that are considered less engaged vs fan bases that are hardcore? We wil use the Montrèal Canadiens as a hardcore fanbase and the Florida Panthers as a less engaged fan base, these choices were made off attendance.
 
@@ -288,15 +319,47 @@ wf_boots_plot
 ## Looking at the Boston Bruins we will run a regression of the number of goals scored (`bos_score`) as the dependent variable, `bos_location` as the main independent variable, and the following other control/independent variables playoff game (`playoff`) and game went to overtime (`ot`). 
 
 ```{r}
+library(broom)
 
-fit_bos <- lm(bos_score ~ bos_location + playoff + ot, data = bos_data)
+##Regular Regression
+
+fit_bos <- lm(bos_score ~ bos_location, data = bos_data)
 
 summary(fit_bos)
+
+var_labels_l <- c(
+"(Intercept)" = "Intercept",
+"bos_locationHome" = "Home Ice Advantage"
+)
 
 modelsummary::modelsummary(fit_bos,
                            statistic = c("s.e. = {std.error}",
                                          "p = {p.value}"),
+                           coef_map = var_labels_l,
                            gof_map = c("nobs", "r.squared", "adj.r.squared"))
+
+
+
+##Multi Variable Regression
+
+fit_bos_multi <- lm(bos_score ~ bos_location + playoff + overtime + shootout, data = bos_data)
+
+summary(fit_bos_multi)
+
+var_labels <- c(
+"(Intercept)" = "Intercept",
+"bos_locationHome" = "Home Ice Advantage",
+"playoff" = "Playoff Game",
+"overtime" = "Game ends in Overtime",
+"shootout" = "Game ends in Shootout"
+)
+
+modelsummary::modelsummary(fit_bos_multi,
+                           statistic = c("s.e. = {std.error}",
+                                         "p = {p.value}"),
+                           coef_map = var_labels,
+                           gof_map = c("nobs", "r.squared", "adj.r.squared"))
+
 ```
 
 
