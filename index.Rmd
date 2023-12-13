@@ -95,10 +95,12 @@ bos_ind_dep_vis
 
 ### Section Three: Results (Plots, Regressions, and Descriptions)
 
-XXXXXX
+Over the course of this section of the project I will explore the effects of the Boston Bruins goals scored from home ice advantage through bootstrapping, a main regression of interest, and a multi-variable regression. After we will examine a high fan engagement market and low fan engagement market (something that is not measured through a variable) to examine if there is at least some correlation in home ice advantage with fan engagement, we will approach this using bootstrapping.
 
+For the Boston Bruins portion of the results, our null hypothesis is that there is no effect on goals scored from home ice advantage. Our alternative hypothesis is that there is a positive effect on goals scored from home ice advantage. Using these our original research question and hypothesis in the introduction would be proven to be true if we reject the null.
+
+##### ATE of Playing at Home on Goals Scored for the Boston Bruins
 ```{r}
-#Find ATE of Playing at Home on Goals Scored
 bos_ate <- bos_data |>
   group_by(bos_location) |>
   summarise(bos_score_mean = mean(bos_score)) |>
@@ -130,6 +132,7 @@ plot_visb
 ##### Brief Interpretation of the Average Treatment Effect
 The estimated effect of the Boston Bruins playing an NHL game at home versus playing an NHL game away is an increase in the Boston Bruins number of goals scored by 0.52.
 
+##### Bootstrapping Examining the Effects of Goals Scored When Playing at Home for the Boston Bruins
 ```{r}
 #Let's Try Bootstrapping
 library(infer)
@@ -165,7 +168,6 @@ The confidence interval for the Boston Bruins is 0.43 to 0.60, which does not in
 
 This confidence interval of 0.43 to 0.60 provides a range of plausible values in this case meaning the true difference in the number of goals scored at home versus away for the Boston Bruins. This also leads us to the conclusion that we have a statistically significant finding as a 95% confidence interval tells us that if we were to replicate this experiment, 95% of the results would exclude zero.
 
-
 #### Looking at the Boston Bruins we will run a regression of the number of goals scored (`bos_score`) as the dependent variable, `bos_location` as the main independent variable. This is a two variable regression.
 
 ```{r}
@@ -189,6 +191,9 @@ modelsummary::modelsummary(fit_bos,
                            gof_map = c("nobs", "r.squared", "adj.r.squared"))
                           
 ```
+##### Brief Interpretation of the Regression
+XXXXXXXXXXXXXX
+
 
 #### Looking at the Boston Bruins we will run a multi variable regression of the number of goals scored (`bos_score`) as the dependent variable, `bos_location` as the main independent variable and the following other control/independent variables playoff game (`playoff`) and game went to overtime (`ot`). 
 
@@ -214,11 +219,14 @@ modelsummary::modelsummary(fit_bos_multi,
                            gof_map = c("nobs", "r.squared", "adj.r.squared"))
 
 ```
+##### Brief Interpretation of the Multi Variable Regression
+XXXXXXXXXXXXXX
 
-#### How does this change over fanbases that are considered less engaged vs fan bases that are hardcore? We wil use the Montrèal Canadiens as a hardcore fanbase and the Florida Panthers as a less engaged fan base, these choices were made off attendance.
+
+#### We will now move to exploring fan engagement another potential variable that could have been controlled for or could be impacting the relationship between the number of goals scored and home ice advantage. Fan engagement is not a variable measured in the data sets but I have selected the Montrèal Canadiens as a high fan engagement team and the Florida Panthers as a low fan engagement team. These teams were chose by looking at attendance of NHL games and qualitative research on NHL fanbases. We will examine how does fan engagement effects the number of goals scored when playing at home by simply comparing and analyzing the differences between the two teams that have different fan markets.
 
 ```{r}
-#What about in the best fan base (Montréal Canadiens)
+#Montréal Canadiens
 #Filter to Only Montréal, Make Variable for if MTL Home or Away and Variable for MTL Goals
 mtl_data <- total |>
   filter(home_team_abbr == "MTL" | away_team_abbr == "MTL") |>
@@ -247,7 +255,7 @@ plot_vism <- mtl_data |>
             position = position_dodge(width = 0.7),
             vjust = -0.5, color = "black", size = 3)
 
-#What about in the worst fan base (Florida Panthers)
+#Florida Panthers
 #Filter to Only Florida, Make Variable for if FLA Home or Away and Variable for FLA Goals
 fla_data <- total |>
   filter(home_team_abbr == "FLA" | away_team_abbr == "FLA") |>
@@ -276,8 +284,8 @@ plot_visf <- fla_data |>
             position = position_dodge(width = 0.7),
             vjust = -0.5, color = "black", size = 3)
 
+# Combine Plots
 library(patchwork)
-
 combined_plot1 <- plot_vism + plot_visf +
   plot_layout(ncol = 2) +
   plot_annotation(title = "Comparison of Goals Scored Home vs Away",
@@ -301,9 +309,8 @@ The estimated effect of the Montrèal Canadiens playing an NHL game at home vers
 The estimated effect of the Florida Panthers playing an NHL game at home versus playing an NHL game away is an increase in the Florida Panthers number of goals scored by 0.30.
 
 ```{r}
-#Let's Try Bootstrapping
+#Let's Try Bootstrapping Montrèal
 library(infer)
-
 mtl_boots <- mtl_data |>
   rep_slice_sample(prop = 1, replace = TRUE, reps = 1000) |>
   group_by(replicate, mtl_location) |>
@@ -322,7 +329,7 @@ mtl_boots_plot <- mtl_boots |>
   labs(y = "Density", x = "Additional Goals Scored When Play at Home") + 
   ggtitle("Montréal Canadiens")
 
-#Let's Try Bootstrapping
+#Let's Try Bootstrapping Florida
 library(infer)
 
 fla_boots <- fla_data |>
@@ -343,13 +350,14 @@ fla_boots_plot <- fla_boots |>
   labs(y = "Density", x = "Additional Goals Scored When Play at Home") + 
   ggtitle("Florida Panthers")
 
-# Combine the CI table
+# Combine the Bootstraps
 combined_plot2 <- mtl_boots_plot + fla_boots_plot / plot_layout(ncol = 2) + plot_annotation(
   title = "Home Ice Advantage: The Effect on Goals over 1000 Bootstraps",
   theme = theme(plot.title = element_text(hjust = 0.5))
 )
 combined_plot2
 
+# Combine the CI tables
 combined_ci <- cbind(fla_ci_95, mtl_ci_95) |>
   kbl(col.names = c("Lower Confidence Interval (FLA)", "Upper Confidence Interval (FLA)",
                     "Lower Confidence Interval (MTL)", "Upper Confidence Interval (MTL)"),
@@ -368,6 +376,9 @@ The confidence interval for the Florida Panthers is 0.18 to 0.42, which does not
 These confidence intervals provide a range of plausible values in this case meaning the true difference in the number of goals scored at home versus away for the specified team. This also leads us to the conclusion that we have a statistically significant finding as a 95% confidence interval tells us that if we were to replicate this experiment, 95% of the results would exclude zero.
 
 ### Section Three Continued: Results (An Explanation) 
+
+
+### Section Four: Conclusion
 
 
 
