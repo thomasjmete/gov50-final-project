@@ -96,7 +96,7 @@ bos_ind_dep_vis
 ### Section Three: Results
 
 
-## What is the Average Treatment Effect of the Boston Bruins playaing at home (we will observe number of goals scored as the dependent variable).
+XXXXXX
 
 ```{r}
 #Find ATE of Playing at Home on Goals Scored
@@ -126,7 +126,12 @@ plot_visb <- bos_data |>
             position = position_dodge(width = 0.7),
             vjust = -0.5, color = "black", size = 3)
 plot_visb
+```
 
+##### Brief Interpretation of the Average Treatment Effect
+The estimated effect of the Boston Bruins playing an NHL game at home versus playing an NHL game away is an increase in the Boston Bruins number of goals scored by 0.52.
+
+```{r}
 #Let's Try Bootstrapping
 library(infer)
 
@@ -140,12 +145,6 @@ bos_boots <- bos_data |>
 
 bos_ci_95 <- bos_boots |>
   get_confidence_interval(level = 0.95, type = "percentile")
-bos_ci_95
-
-knitr::kable(
-  bos_ci_95,
-  col.names = c("Lower Confidence Interval", "Upper Confidence Interval"), caption = "Boston Bruins: Confidence Interval at 95%",
-  digits = 2)
 
 bos_boots_plot <- bos_boots |>
   ggplot(mapping = aes(x = ATE)) + 
@@ -155,7 +154,18 @@ bos_boots_plot <- bos_boots |>
   ggtitle("Boston's Home Ice Advantage: The Effect on Goals over 1000 Bootstraps")
 bos_boots_plot
 
+knitr::kable(
+  bos_ci_95,
+  col.names = c("Lower Confidence Interval", "Upper Confidence Interval"), caption = "Boston Bruins: Confidence Interval at 95%",
+  digits = 2)
+
 ```
+
+##### Brief Interpretation of the Confidence Interval
+The confidence interval for the Boston Bruins is 0.43 to 0.60, which does not include 0. This means that no difference between the number of goals scored at home or away is not a plausible value of the true population parameter, at least at the 95% confidence level. 
+
+This confidence interval of 0.43 to 0.60 provides a range of plausible values in this case meaning the true difference in the number of goals scored at home versus away for the Boston Bruins. This also leads us to the conclusion that we have a statistically significant finding as a 95% confidence interval tells us that if we were to replicate this experiment, 95% of the results would exclude zero.
+
 
 #### Looking at the Boston Bruins we will run a regression of the number of goals scored (`bos_score`) as the dependent variable, `bos_location` as the main independent variable. This is a two variable regression.
 
@@ -238,31 +248,6 @@ plot_vism <- mtl_data |>
             position = position_dodge(width = 0.7),
             vjust = -0.5, color = "black", size = 3)
 
-
-#Let's Try Bootstrapping
-library(infer)
-
-mtl_boots <- mtl_data |>
-  rep_slice_sample(prop = 1, replace = TRUE, reps = 1000) |>
-  group_by(replicate, mtl_location) |>
-  summarise(mtl_score_mean = mean(mtl_score)) |>
-  pivot_wider(names_from = mtl_location, values_from = mtl_score_mean) |>
-  mutate(ATE = `Home` - `Away`) |>
-  select(replicate, ATE)
-
-mtl_ci_95 <- mtl_boots |>
-  get_confidence_interval(level = 0.95, type = "percentile")
-
-mtl_boots_plot <- mtl_boots |>
-  ggplot(mapping = aes(x = ATE)) + 
-  geom_histogram(aes(y = after_stat(density)), binwidth = 0.0055, fill = "#DF5365") +
-  geom_vline(xintercept = unlist(mtl_ci_95)) +
-  labs(y = "Density", x = "Additional Goals Scored When Play at Home") + 
-  ggtitle("Montréal Canadiens")
-```
-
-
-```{r}
 #What about in the worst fan base (Florida Panthers)
 #Filter to Only Florida, Make Variable for if FLA Home or Away and Variable for FLA Goals
 fla_data <- total |>
@@ -292,6 +277,51 @@ plot_visf <- fla_data |>
             position = position_dodge(width = 0.7),
             vjust = -0.5, color = "black", size = 3)
 
+library(patchwork)
+
+combined_plot1 <- plot_vism + plot_visf +
+  plot_layout(ncol = 2) +
+  plot_annotation(title = "Comparison of Goals Scored Home vs Away",
+                  theme = theme(plot.title = element_text(hjust = 0.5)))
+combined_plot1
+
+# Combine the ATE table
+library(kableExtra)
+combined_ate <- cbind(fla_ate, mtl_ate) |>
+  kbl(col.names = c("Home (FLA)", "Away (FLA)", "ATE of Home Ice (FLA)",
+                    "Home (MTL)", "Away (MTL)", "ATE of Home Ice (MTL)"),
+      caption = "Florida Panthers and Montréal Canadiens: Comparison of Number of Goals Scored",
+      digits = 2) |>
+  kable_styling()
+combined_ate
+```
+
+##### Brief Interpretation of the Average Treatment Effect
+The estimated effect of the Montrèal Canadiens playing an NHL game at home versus playing an NHL game away is an increase in the Montrèal Canadiens number of goals scored by 0.68.
+
+The estimated effect of the Florida Panthers playing an NHL game at home versus playing an NHL game away is an increase in the Florida Panthers number of goals scored by 0.30.
+
+```{r}
+#Let's Try Bootstrapping
+library(infer)
+
+mtl_boots <- mtl_data |>
+  rep_slice_sample(prop = 1, replace = TRUE, reps = 1000) |>
+  group_by(replicate, mtl_location) |>
+  summarise(mtl_score_mean = mean(mtl_score)) |>
+  pivot_wider(names_from = mtl_location, values_from = mtl_score_mean) |>
+  mutate(ATE = `Home` - `Away`) |>
+  select(replicate, ATE)
+
+mtl_ci_95 <- mtl_boots |>
+  get_confidence_interval(level = 0.95, type = "percentile")
+
+mtl_boots_plot <- mtl_boots |>
+  ggplot(mapping = aes(x = ATE)) + 
+  geom_histogram(aes(y = after_stat(density)), binwidth = 0.0055, fill = "#DF5365") +
+  geom_vline(xintercept = unlist(mtl_ci_95)) +
+  labs(y = "Density", x = "Additional Goals Scored When Play at Home") + 
+  ggtitle("Montréal Canadiens")
 
 #Let's Try Bootstrapping
 library(infer)
@@ -313,34 +343,14 @@ fla_boots_plot <- fla_boots |>
   geom_vline(xintercept = unlist(fla_ci_95)) +
   labs(y = "Density", x = "Additional Goals Scored When Play at Home") + 
   ggtitle("Florida Panthers")
-```
 
-```{r}
-library(patchwork)
-
-combined_plot1 <- plot_vism + plot_visf +
-  plot_layout(ncol = 2) +
-  plot_annotation(title = "Comparison of Goals Scored Home vs Away",
-                  theme = theme(plot.title = element_text(hjust = 0.5)))
-combined_plot1
-
+# Combine the CI table
 combined_plot2 <- mtl_boots_plot + fla_boots_plot / plot_layout(ncol = 2) + plot_annotation(
   title = "Home Ice Advantage: The Effect on Goals over 1000 Bootstraps",
   theme = theme(plot.title = element_text(hjust = 0.5))
 )
 combined_plot2
 
-# Combine the ATE table
-library(kableExtra)
-combined_ate <- cbind(fla_ate, mtl_ate) |>
-  kbl(col.names = c("Home (FLA)", "Away (FLA)", "ATE of Home Ice (FLA)",
-                    "Home (MTL)", "Away (MTL)", "ATE of Home Ice (MTL)"),
-      caption = "Florida Panthers and Montréal Canadiens: Comparison of Number of Goals Scored",
-      digits = 2) |>
-  kable_styling()
-combined_ate
-
-# Combine the CI table
 combined_ci <- cbind(fla_ci_95, mtl_ci_95) |>
   kbl(col.names = c("Lower Confidence Interval (FLA)", "Upper Confidence Interval (FLA)",
                     "Lower Confidence Interval (MTL)", "Upper Confidence Interval (MTL)"),
@@ -351,6 +361,12 @@ combined_ci
 
 ```
 
+##### Brief Interpretation of the Confidence Intervals
+The confidence interval for the Montrèal Canadiens is 0.59 to 0.76, which does not include 0. This means that no difference between the number of goals scored at home or away is not a plausible value of the true population parameter, at least at the 95% confidence level.
+
+The confidence interval for the Florida Panthers is 0.18 to 0.42, which does not include 0. This means that no difference between the number of goals scored at home or away is not a plausible value of the true population parameter, at least at the 95% confidence level.
+
+These confidence intervals provide a range of plausible values in this case meaning the true difference in the number of goals scored at home versus away for the specified team. This also leads us to the conclusion that we have a statistically significant finding as a 95% confidence interval tells us that if we were to replicate this experiment, 95% of the results would exclude zero.
 
 
 
