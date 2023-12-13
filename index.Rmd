@@ -69,21 +69,6 @@ knitr::kable(
   col.names = c("Home", "Away", "ATE of Home Ice"), caption = "Boston Bruins: Number Goals Scored",
   digits = 2)
 
-## Visualization Comparing Number of Goals Boston Scores at Home versus Away
-plot_vis <- bos_data |>
-  group_by(bos_location) |>
-  summarise(bos_score_mean = mean(bos_score)) |>
-  ggplot(aes(x = bos_location, y = bos_score_mean, fill = factor(bos_location))) +
-  geom_col(width = 0.7) +
-  labs(title = "Boston Bruins: Goals Scored Home vs Away",
-       x = "Location",
-       y = "Number of Goals Scored") +   
-  scale_fill_manual(values = c("Home" = "#F5C710", "Away" = "black")) +
-  geom_text(aes(label = round(bos_score_mean, 2)),
-            position = position_dodge(width = 0.7),
-            vjust = -0.5, color = "black", size = 3)
-plot_vis
-
 #Let's Try Bootstrapping
 library(infer)
 
@@ -337,8 +322,21 @@ modelsummary::modelsummary(fit_bos,
                                          "p = {p.value}"),
                            coef_map = var_labels_l,
                            gof_map = c("nobs", "r.squared", "adj.r.squared"))
-
-
+                           
+## Visualization Comparing Number of Goals Boston Scores at Home versus Away
+plot_visb <- bos_data |>
+  group_by(bos_location) |>
+  summarise(bos_score_mean = mean(bos_score)) |>
+  ggplot(aes(x = bos_location, y = bos_score_mean, fill = factor(bos_location))) +
+  geom_col(width = 0.7) +
+  labs(title = "Boston Bruins: Goals Scored Home vs Away",
+       x = "Location",
+       y = "Number of Goals Scored") +   
+  scale_fill_manual(values = c("Home" = "#F5C710", "Away" = "black")) +
+  geom_text(aes(label = round(bos_score_mean, 2)),
+            position = position_dodge(width = 0.7),
+            vjust = -0.5, color = "black", size = 3)
+plot_visb
 
 ##Multi Variable Regression
 
