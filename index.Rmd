@@ -93,8 +93,7 @@ bos_ind_dep_vis
 ```
 
 
-### Section Three: Results
-
+### Section Three: Results (Plots, Regressions, and Descriptions)
 
 XXXXXX
 
@@ -367,6 +366,8 @@ The confidence interval for the Montrèal Canadiens is 0.59 to 0.76, which does 
 The confidence interval for the Florida Panthers is 0.18 to 0.42, which does not include 0. This means that no difference between the number of goals scored at home or away is not a plausible value of the true population parameter, at least at the 95% confidence level.
 
 These confidence intervals provide a range of plausible values in this case meaning the true difference in the number of goals scored at home versus away for the specified team. This also leads us to the conclusion that we have a statistically significant finding as a 95% confidence interval tells us that if we were to replicate this experiment, 95% of the results would exclude zero.
+
+### Section Three Continued: Results (An Explanation) 
 
 
 
