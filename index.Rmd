@@ -129,8 +129,10 @@ plot_visb <- bos_data |>
 plot_visb
 ```
 
-##### Brief Interpretation of the Average Treatment Effect
+##### Interpretation of the Average Treatment Effect
 The estimated effect of the Boston Bruins playing an NHL game at home versus playing an NHL game away is an increase in the Boston Bruins number of goals scored by 0.52.
+
+This average treatment effect shows that there are more goal scored when the Boston Bruins plat at home which is in line with our original hypothesis, we will bootstrap and examine confidence intervals to further interperate the relationship and validity of these results.
 
 ##### Bootstrapping Examining the Effects of Goals Scored When Playing at Home for the Boston Bruins
 ```{r}
@@ -163,12 +165,14 @@ knitr::kable(
 
 ```
 
-##### Brief Interpretation of the Confidence Interval
+##### Interpretation of the Confidence Interval
 The confidence interval for the Boston Bruins is 0.43 to 0.60, which does not include 0. This means that no difference between the number of goals scored at home or away is not a plausible value of the true population parameter, at least at the 95% confidence level. 
 
 This confidence interval of 0.43 to 0.60 provides a range of plausible values in this case meaning the true difference in the number of goals scored at home versus away for the Boston Bruins. This also leads us to the conclusion that we have a statistically significant finding as a 95% confidence interval tells us that if we were to replicate this experiment, 95% of the results would exclude zero.
 
 #### Looking at the Boston Bruins we will run a regression of the number of goals scored (`bos_score`) as the dependent variable, `bos_location` as the main independent variable. This is a two variable regression.
+
+My primary independent variable of interest was the boston location variable, which shows if the game was played at home or away. The following regression table displays the details for a regression equation involving only that variable.
 
 ```{r}
 library(broom)
@@ -191,9 +195,8 @@ modelsummary::modelsummary(fit_bos,
                            gof_map = c("nobs", "r.squared", "adj.r.squared"))
                           
 ```
-##### Brief Interpretation of the Regression
-XXXXXXXXXXXXXX
-
+##### Interpretation of the Regression
+The regression table above displays an intercept of the line of 2.913, meaning that, in games that are not played at home for the Boston Bruins they score 2.913 goals. The coefficient associated with bos_location is 0.517, which also represents the slope. This can be interpreted to mean that when a game is played in Boston, there is a 0.517 increase in the number of goals scored by the Boston Bruins. This number has a p-value of less than 0.001, which is statistically significant with an alpha of 0.05. Given that the p-value is less than the alpha of 0.05 we can reject the null hypothesis that there is no effect on goals scored from home ice advantage.  
 
 #### Looking at the Boston Bruins we will run a multi variable regression of the number of goals scored (`bos_score`) as the dependent variable, `bos_location` as the main independent variable and the following other control/independent variables playoff game (`playoff`) and game went to overtime (`ot`). 
 
@@ -219,11 +222,20 @@ modelsummary::modelsummary(fit_bos_multi,
                            gof_map = c("nobs", "r.squared", "adj.r.squared"))
 
 ```
-##### Brief Interpretation of the Multi Variable Regression
-XXXXXXXXXXXXXX
+##### Interpretation of the Multi Variable Regression
+In the table above, the intercept is 3.005, which implies that when all variables are controlled for meaning it is not a home game, not a playoff game, and the game does not end in overtime or a shootout there are 3.005 goals scored by the Boston Bruins. 
 
+We can observe that Home Ice Advantage variable has a coefficient of 0.516, which implies that when the Boston Bruins play at home they score 0.516 more goals, holding all other variable equal. 
 
-#### We will now move to exploring fan engagement another potential variable that could have been controlled for or could be impacting the relationship between the number of goals scored and home ice advantage. Fan engagement is not a variable measured in the data sets but I have selected the Montrèal Canadiens as a high fan engagement team and the Florida Panthers as a low fan engagement team. These teams were chose by looking at attendance of NHL games and qualitative research on NHL fanbases. We will examine how does fan engagement effects the number of goals scored when playing at home by simply comparing and analyzing the differences between the two teams that have different fan markets.
+Of our other control independent variabes we observe that there are negative effects on goals scored. All of the coefficients in this table had p-values p = <0.001 which means that using a 95% confidence interval through an aplha level of 0.05, the results are highly statistical significance. However, when observing if a game ends in a shootout the p-value is p = 0.002, this is still below the aplha level of 0.05 implying the result is statisticaly significant but it is not as strong as the other observations in this regression.
+
+When a game is played in the playoffs there is a negative effect of 0.264 goals scored on the Boston Bruins, when the game ends in overtime	there is a negative effect of 0.517 goals scored on the Boston Bruins, when a games ends in a shootout there is a negative effect on goals scored of 0.465. 
+
+Overall, we will reject the null as there is a plausible effect on goals scored when the Boston Bruins play at home. However the number of goals scored when playing at home is strongest during a regular season game that concludes in regulation as we observed negative effects on goals scored for games in the playoffs and those that end in overtime or a shootout.
+
+#### Exploring Fan Engagement
+
+We will now move to exploring fan engagement another potential variable that could have been controlled for or could be impacting the relationship between the number of goals scored and home ice advantage. Fan engagement is not a variable measured in the data sets but I have selected the Montrèal Canadiens as a high fan engagement team and the Florida Panthers as a low fan engagement team. These teams were chose by looking at attendance of NHL games and qualitative research on NHL fanbases. We will examine how does fan engagement effects the number of goals scored when playing at home by simply comparing and analyzing the differences between the two teams that have different fan markets. I hypothesize that we will observe a greater effect on goals scored when a team plays at home if they have high fan engagement.
 
 ```{r}
 #Montréal Canadiens
@@ -308,6 +320,8 @@ The estimated effect of the Montrèal Canadiens playing an NHL game at home vers
 
 The estimated effect of the Florida Panthers playing an NHL game at home versus playing an NHL game away is an increase in the Florida Panthers number of goals scored by 0.30.
 
+This is of interest as we observed a greater average treatment effect on goals scored when playing at home for the Montrèal Canadiens when compared to the Florida Panthers. The difference between the average treatment effects is 0.38 goals scored. This observation does introduced another variable that may be influencing the impacts of goals scored when playing at home which is fan engagement. We see that the high fan engagement Montrèal Canadiens score 0.38 more goals at home than the low fan engagement Florida Panthers. We will look at confidence intervals and bootstrapping to explore the validity of this in more detail. This is only a comparison of two teams so we can not confidently claim that high fan engagement teams score more at home than low fan engagement teams.
+
 ```{r}
 #Let's Try Bootstrapping Montrèal
 library(infer)
@@ -375,13 +389,13 @@ The confidence interval for the Florida Panthers is 0.18 to 0.42, which does not
 
 These confidence intervals provide a range of plausible values in this case meaning the true difference in the number of goals scored at home versus away for the specified team. This also leads us to the conclusion that we have a statistically significant finding as a 95% confidence interval tells us that if we were to replicate this experiment, 95% of the results would exclude zero.
 
-### Section Three Continued: Results (An Explanation) 
-
+While we can tell that we have statistically significant findings for both the Montrèal Canadiens and the Florida Panthers and we observed that the high fan engagement Montrèal Canadiens score 0.38 more goals at home than the low fan engagement Florida Panthers there still is not enough to claim that fan engagement has a causal effect on goals scored for a variety of reasons including limited data and analysis but there is a positive relationship between a fan engagement and goals scored in this case.
 
 ### Section Four: Conclusion
 
+To conclude the regression results and my findings when examining the Boston Bruins are in line with my original hypothesis that there is a positive relationship between the number of goals scored and play at home.These regression results support my hypothesis that there is a relationship between goals scored and Boston location. The results support a rejection of the null hypothesis that there is no relationship. 
 
-
+The main limitation to this project is we only conducted a detailed an analysis for one NHL team, the Boston Bruins, and using the findings of this NHL team made an assumption that the findings would hold across all NHL teams and the broader league. This is not ideal and this analysis is limited by only exploring one team. I had to create the variables of interest to observe the relationship for the Boston Bruins and due to time was not able to individually examine each NHL team and create variables for each such as tor_location, nyr_scored, det_location and then look at the average of all 32 NHL teams to deeply analyze a potential relationship. In the future it would be preferable to conduct the analysis that was done for th Boston Bruins for all 32 NHL teams as each team is unique and is subject to other confounding variables. If I were to come to similar findings as i did with the Boston Bruins than I would be more confident is rejecting the null hypothesis across the entire NHL.
 
 
 
