@@ -8,7 +8,7 @@ description: "Exploring 'home advantage' in the NHL, this project investigates i
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-### Introduction
+### Section One: Introduction
 
 In all major sports leagues, “home advantage” has emerged as an influential aspect regardless of the sport. It has left players, coaches, and insiders convinced the “home advantage” teams bear for fifty percent of their regular season games, may be enough to tilt the field in their favor when a game is underway. The notion of performing better at home is engrained in the culture of professional sports, serving as a coveted prize of teams that finish the season at the top of the standings when playoffs ensue. In a sports world that has become fiercely competitive on the field, off the field the rise of online gambling has altered the odds beating landscape. Viewers at home, turned recreational sports gamblers, like players are turning to “home advantage” as a potential prospect to help rise above the rest. Whether it be playing a game in front of a boisterous home crowd, the familiarity and comfort that comes with playing in a familiar stadium, or some intangible factor,  team’s have been left with the opinion that their local environment, due in fact, provide a crucial boost when it is all on the line.
 
@@ -20,7 +20,7 @@ Exploring this research question — through the Boston Bruins — is of importa
 
 
 
-### Data Section
+### Section Two: Data Section
 
 #### Read in the Data Set 
 ```{r, eval = T}
@@ -91,6 +91,9 @@ bos_ind_dep_vis <- ggplot(bos_ind_dep, aes(x = bos_location, y = bos_score)) +
   theme_minimal()
 bos_ind_dep_vis
 ```
+
+
+### Section Three: Results
 
 
 ## What is the Average Treatment Effect of the Boston Bruins playaing at home (we will observe number of goals scored as the dependent variable).
@@ -249,12 +252,6 @@ mtl_boots <- mtl_data |>
 
 mtl_ci_95 <- mtl_boots |>
   get_confidence_interval(level = 0.95, type = "percentile")
-mtl_ci_95
-
-knitr::kable(
-  mtl_ci_95,
-  col.names = c("Lower Confidence Interval", "Upper Confidence Interval"), caption = "Montrèal Canadiens: Confidence Interval at 95%",
-  digits = 2)
 
 mtl_boots_plot <- mtl_boots |>
   ggplot(mapping = aes(x = ATE)) + 
@@ -309,12 +306,6 @@ fla_boots <- fla_data |>
 
 fla_ci_95 <- fla_boots |>
   get_confidence_interval(level = 0.95, type = "percentile")
-fla_ci_95
-
-knitr::kable(
-  fla_ci_95,
-  col.names = c("Lower Confidence Interval", "Upper Confidence Interval"), caption = "Florida Panthers: Confidence Interval at 95%",
-  digits = 2)
 
 fla_boots_plot <- fla_boots |>
   ggplot(mapping = aes(x = ATE)) + 
@@ -339,15 +330,24 @@ combined_plot2 <- mtl_boots_plot + fla_boots_plot / plot_layout(ncol = 2) + plot
 )
 combined_plot2
 
-knitr::kable(
-  fla_ate,
-  col.names = c("Home", "Away", "ATE of Home Ice"), caption = "Florida Panthers: Number Goals Scored",
-  digits = 2)
+# Combine the ATE table
+library(kableExtra)
+combined_ate <- cbind(fla_ate, mtl_ate) |>
+  kbl(col.names = c("Home (FLA)", "Away (FLA)", "ATE of Home Ice (FLA)",
+                    "Home (MTL)", "Away (MTL)", "ATE of Home Ice (MTL)"),
+      caption = "Florida Panthers and Montréal Canadiens: Comparison of Number of Goals Scored",
+      digits = 2) |>
+  kable_styling()
+combined_ate
 
-knitr::kable(
-  mtl_ate,
-  col.names = c("Home", "Away", "ATE of Home Ice"), caption = "Montrèal Canadiens: Number Goals Scored",
-  digits = 2)
+# Combine the CI table
+combined_ci <- cbind(fla_ci_95, mtl_ci_95) |>
+  kbl(col.names = c("Lower Confidence Interval (FLA)", "Upper Confidence Interval (FLA)",
+                    "Lower Confidence Interval (MTL)", "Upper Confidence Interval (MTL)"),
+      caption = "Florida Panthers and Montréal Canadiens: Confidence Interval at 95%",
+      digits = 2) |>
+  kable_styling()
+combined_ci
 
 ```
 
