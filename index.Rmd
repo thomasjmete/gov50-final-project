@@ -110,7 +110,7 @@ bos_ate
 
 knitr::kable(
   bos_ate,
-  col.names = c("Home", "Away", "ATE of Home Ice"), caption = "Boston Bruins: Number Goals Scored",
+  col.names = c("Away", "Home", "ATE of Home Ice"), caption = "Boston Bruins: Number Goals Scored",
   digits = 2)
 
 ## Visualization Comparing Number of Goals Boston Scores at Home versus Away
