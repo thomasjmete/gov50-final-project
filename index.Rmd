@@ -307,8 +307,8 @@ combined_plot1
 # Combine the ATE table
 library(kableExtra)
 combined_ate <- cbind(fla_ate, mtl_ate) |>
-  kbl(col.names = c("Home (FLA)", "Away (FLA)", "ATE of Home Ice (FLA)",
-                    "Home (MTL)", "Away (MTL)", "ATE of Home Ice (MTL)"),
+  kbl(col.names = c("Away (FLA)", "Home (FLA)", "ATE of Home Ice (FLA)",
+                    "Away (MTL)", "Home (MTL)", "ATE of Home Ice (MTL)"),
       caption = "Florida Panthers and Montréal Canadiens: Comparison of Number of Goals Scored",
       digits = 2) |>
   kable_styling()
